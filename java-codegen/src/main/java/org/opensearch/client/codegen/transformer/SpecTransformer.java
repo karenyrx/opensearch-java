@@ -24,6 +24,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
@@ -77,6 +78,8 @@ public class SpecTransformer {
     private final TypeMapper typeMapper;
     @Nonnull
     private final Namespace root = new Namespace();
+    @Nullable
+    private OpenApiSpecification spec;
     @Nonnull
     private final Map<OpenApiSchema, Shape> visitedSchemas = new ConcurrentHashMap<>();
 
@@ -93,6 +96,7 @@ public class SpecTransformer {
 
     public void visit(@Nonnull OpenApiSpecification spec) {
         Objects.requireNonNull(spec, "spec must not be null");
+        this.spec = spec;
 
         LOGGER.info("Visiting Specification: {}", spec);
 
@@ -583,16 +587,23 @@ public class SpecTransformer {
             schema = schema.resolve();
         }
 
+        final var overrides = this.overrides.getSchema(schema.getPointer());
+
         if (schema.has$extends()) {
             shape.setExtendsType(typeMapper.mapType(schema.get$extends().orElseThrow()));
+        } else if (spec != null) {
+            overrides.flatMap(SchemaOverride::getExtendsSchema)
+                .flatMap(ptr -> spec.getElement(ptr))
+                .map(el -> (OpenApiSchema) el)
+                .map(this::visit)
+                .map(Shape::getType)
+                .ifPresent(shape::setExtendsType);
         }
 
         var superShape = shape.extendsOtherShape() ? (ObjectShapeBase) shape.getExtendsType().getTargetShape().orElseThrow() : null;
 
         final var properties = schema.getProperties().orElseThrow();
         final var required = schema.getRequired().orElseThrow();
-
-        final var overrides = this.overrides.getSchema(schema.getPointer());
 
         properties.forEach((k, v) -> {
             if (superShape != null && superShape.hasBodyFieldWithWireName(k)) {

@@ -122,6 +122,26 @@ public class Overrides {
                         p -> p.with("aggregations", po -> po.withAliases(Set.of("aggs"))).with("aggs", po -> po.withIgnore(true))
                     )
                 )
+                .with(
+                    schema("_common.aggregations", "PercentilesAggregateBase"),
+                    so -> so.withExtendsSchema(schema("_common.aggregations", "AggregateBase"))
+                )
+                .with(
+                    schema("_common.aggregations", "SingleMetricAggregateBase"),
+                    so -> so.withExtendsSchema(schema("_common.aggregations", "AggregateBase"))
+                )
+                .with(
+                    schema("_common.aggregations", "StatsAggregateBase"),
+                    so -> so.withExtendsSchema(schema("_common.aggregations", "AggregateBase"))
+                )
+                .with(
+                    schema("_common.aggregations", "MultiBucketAggregateBase"),
+                    so -> so.withExtendsSchema(schema("_common.aggregations", "AggregateBase"))
+                )
+                .with(
+                    schema("_common.aggregations", "SingleBucketAggregateBase"),
+                    so -> so.withExtendsSchema(schema("_common.aggregations", "AggregateBase"))
+                )
 
                 .with(schema("_common.query_dsl", "FunctionScoreContainer"), so -> so.withClassName("FunctionScore"))
 

@@ -35,6 +35,8 @@ public final class SchemaOverride {
     private final String className;
     @Nullable
     private final Type mappedType;
+    @Nullable
+    private final JsonPointer extendsSchema;
 
     private SchemaOverride(Builder builder) {
         this.shouldGenerate = builder.shouldGenerate;
@@ -42,6 +44,7 @@ public final class SchemaOverride {
         this.aliasProvider = builder.aliasProvider;
         this.className = builder.className;
         this.mappedType = builder.mappedType;
+        this.extendsSchema = builder.extendsSchema;
     }
 
     @Nonnull
@@ -77,6 +80,11 @@ public final class SchemaOverride {
     }
 
     @Nonnull
+    public Optional<JsonPointer> getExtendsSchema() {
+        return Optional.ofNullable(extendsSchema);
+    }
+
+    @Nonnull
     public static Builder builder() {
         return new Builder();
     }
@@ -97,6 +105,8 @@ public final class SchemaOverride {
         private String className;
         @Nullable
         private Type mappedType;
+        @Nullable
+        private JsonPointer extendsSchema;
 
         private Builder() {}
 
@@ -139,6 +149,12 @@ public final class SchemaOverride {
         @Nonnull
         public Builder withMappedType(@Nonnull Function<Type.Builder, ObjectBuilder<Type>> fn) {
             this.mappedType = Objects.requireNonNull(fn, "fn must not be null").apply(Type.builder()).build();
+            return this;
+        }
+
+        @Nonnull
+        public Builder withExtendsSchema(@Nullable JsonPointer extendsSchema) {
+            this.extendsSchema = extendsSchema;
             return this;
         }
     }
