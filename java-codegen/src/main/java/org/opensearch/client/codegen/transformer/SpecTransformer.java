@@ -45,6 +45,7 @@ import org.opensearch.client.codegen.model.Shape;
 import org.opensearch.client.codegen.model.TaggedUnionShape;
 import org.opensearch.client.codegen.model.types.TypeRef;
 import org.opensearch.client.codegen.model.types.Types;
+import org.opensearch.client.codegen.openapi.JsonPointer;
 import org.opensearch.client.codegen.openapi.In;
 import org.opensearch.client.codegen.openapi.MimeType;
 import org.opensearch.client.codegen.openapi.OpenApiMediaType;
@@ -416,6 +417,15 @@ public class SpecTransformer {
         var className = schemaOverrides.flatMap(SchemaOverride::getClassName).orElse(name);
         var shouldGenerate = schemaOverrides.map(SchemaOverride::shouldGenerate).orElse(ShouldGenerate.IfNeeded);
         return visit(root.child(namespace), className, namespace + "." + name, schema, shouldGenerate);
+    }
+
+    @Nonnull
+    TypeRef mapPointerToType(@Nonnull JsonPointer ptr) {
+        if (spec == null) return Types.Client.Json.JsonData;
+        return spec.getElement(ptr)
+            .map(el -> (OpenApiSchema) el)
+            .map(schema -> visit(schema).getType())
+            .orElse(Types.Client.Json.JsonData);
     }
 
     private Shape visit(Namespace parent, String className, String typedefName, OpenApiSchema schema, ShouldGenerate shouldGenerate) {

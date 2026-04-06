@@ -294,6 +294,11 @@ public class TypeMapper {
             $extends = $extends.get$extends().orElse(null);
         }
 
+        // Fill in any missing type parameters from explicit schema overrides
+        overrides.getSchema(schema.getPointer())
+            .flatMap(SchemaOverride::getTypeArguments)
+            .ifPresent(args -> args.forEach((name, ptr) -> typeParameters.putIfAbsent(name, specTransformer.mapPointerToType(ptr))));
+
         return shape.getMaterializedType()
             .withTypeParameters(
                 Arrays.stream(typeParameterDefs)

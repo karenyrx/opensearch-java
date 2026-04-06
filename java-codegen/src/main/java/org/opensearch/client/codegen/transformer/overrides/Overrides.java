@@ -123,6 +123,30 @@ public class Overrides {
                     )
                 )
 
+                // Fix for spec PR #1063: simplified `buckets` field breaks generic type parameter inference.
+                // The structural zipper cannot match `array<LongTermsBucket>` against `allOf(Buckets, oneOf(...TBucket...))`,
+                // so we provide the TBucket binding explicitly for each affected TermsAggregateBase*Bucket type.
+                .with(
+                    schema("_common.aggregations", "TermsAggregateBaseStringTermsBucket"),
+                    so -> so.withTypeArgument("TBucket", schema("_common.aggregations", "StringTermsBucket"))
+                )
+                .with(
+                    schema("_common.aggregations", "TermsAggregateBaseLongTermsBucket"),
+                    so -> so.withTypeArgument("TBucket", schema("_common.aggregations", "LongTermsBucket"))
+                )
+                .with(
+                    schema("_common.aggregations", "TermsAggregateBaseDoubleTermsBucket"),
+                    so -> so.withTypeArgument("TBucket", schema("_common.aggregations", "DoubleTermsBucket"))
+                )
+                .with(
+                    schema("_common.aggregations", "TermsAggregateBaseUnsignedLongTermsBucket"),
+                    so -> so.withTypeArgument("TBucket", schema("_common.aggregations", "UnsignedLongTermsBucket"))
+                )
+                .with(
+                    schema("_common.aggregations", "TermsAggregateBaseVoid"),
+                    so -> so.withTypeArgument("TBucket", schema("_common", "Void"))
+                )
+
                 .with(schema("_common.query_dsl", "FunctionScoreContainer"), so -> so.withClassName("FunctionScore"))
 
                 .with(schema("_common.query_dsl", "IntervalsContainer"), so -> so.withClassName("Intervals"))

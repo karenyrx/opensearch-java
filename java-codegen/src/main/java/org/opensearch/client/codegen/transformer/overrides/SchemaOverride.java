@@ -9,6 +9,7 @@
 package org.opensearch.client.codegen.transformer.overrides;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
@@ -35,6 +36,8 @@ public final class SchemaOverride {
     private final String className;
     @Nullable
     private final Type mappedType;
+    @Nullable
+    private final Map<String, JsonPointer> typeArguments;
 
     private SchemaOverride(Builder builder) {
         this.shouldGenerate = builder.shouldGenerate;
@@ -42,6 +45,7 @@ public final class SchemaOverride {
         this.aliasProvider = builder.aliasProvider;
         this.className = builder.className;
         this.mappedType = builder.mappedType;
+        this.typeArguments = builder.typeArguments != null ? Collections.unmodifiableMap(builder.typeArguments) : null;
     }
 
     @Nonnull
@@ -77,6 +81,11 @@ public final class SchemaOverride {
     }
 
     @Nonnull
+    public Optional<Map<String, JsonPointer>> getTypeArguments() {
+        return Optional.ofNullable(typeArguments);
+    }
+
+    @Nonnull
     public static Builder builder() {
         return new Builder();
     }
@@ -97,6 +106,8 @@ public final class SchemaOverride {
         private String className;
         @Nullable
         private Type mappedType;
+        @Nullable
+        private Map<String, JsonPointer> typeArguments;
 
         private Builder() {}
 
@@ -139,6 +150,15 @@ public final class SchemaOverride {
         @Nonnull
         public Builder withMappedType(@Nonnull Function<Type.Builder, ObjectBuilder<Type>> fn) {
             this.mappedType = Objects.requireNonNull(fn, "fn must not be null").apply(Type.builder()).build();
+            return this;
+        }
+
+        @Nonnull
+        public Builder withTypeArgument(@Nonnull String name, @Nonnull JsonPointer schemaPointer) {
+            if (this.typeArguments == null) {
+                this.typeArguments = new HashMap<>();
+            }
+            this.typeArguments.put(Objects.requireNonNull(name, "name must not be null"), Objects.requireNonNull(schemaPointer, "schemaPointer must not be null"));
             return this;
         }
     }
